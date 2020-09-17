@@ -182,22 +182,28 @@ window.addEventListener("DOMContentLoaded", function () {
             `;
 			this.parent.append(element);
 		}
-    }
-        
-    const getResourse = async (url) => {
-        const res = await fetch(url);
-        if (!res.ok) {
-            throw new Error(`Could not fetch ${url}, status: ${res.status}`);
-        }
-        return await res.json();
-    };
+	}
 
-    getResourse('http://localhost:3000/menu')
-        .then(data => {
-            data.forEach(({img, altimg, title, descr, price}) => {
-                new MenuCard(img, altimg, title, descr, price, '.menu .container').render(); 
-            });
-    });
+	const getResourse = async (url) => {
+		const res = await fetch(url);
+		if (!res.ok) {
+			throw new Error(`Could not fetch ${url}, status: ${res.status}`);
+		}
+		return await res.json();
+	};
+
+	getResourse("http://localhost:3000/menu").then((data) => {
+		data.forEach(({ img, altimg, title, descr, price }) => {
+			new MenuCard(
+				img,
+				altimg,
+				title,
+				descr,
+				price,
+				".menu .container",
+			).render();
+		});
+	});
 
 	// Forms
 
@@ -212,19 +218,19 @@ window.addEventListener("DOMContentLoaded", function () {
 		bindPostData(item);
 	});
 
-    const postData = async (url, data) => {
-        const res = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-type": "application/json",
-            },
-            body: data
-        });
+	const postData = async (url, data) => {
+		const res = await fetch(url, {
+			method: "POST",
+			headers: {
+				"Content-type": "application/json",
+			},
+			body: data,
+		});
 
-        return await res.json();
-    };
+		return await res.json();
+	};
 
-    function bindPostData(form) {
+	function bindPostData(form) {
 		form.addEventListener("submit", (e) => {
 			e.preventDefault();
 
@@ -237,10 +243,10 @@ window.addEventListener("DOMContentLoaded", function () {
 			form.insertAdjacentElement("afterend", statusMessage);
 
 			const formData = new FormData(form);
-            
-            const json = JSON.stringify(Object.fromEntries(formData.entries()));
 
-            postData("http://localhost:3000/requests", json)
+			const json = JSON.stringify(Object.fromEntries(formData.entries()));
+
+			postData("http://localhost:3000/requests", json)
 				.then((data) => {
 					console.log(data);
 					showThanksModal(message.success);
@@ -278,7 +284,53 @@ window.addEventListener("DOMContentLoaded", function () {
 		}, 4000);
 	}
 
-	fetch(" http://localhost:3000/menu")
-		.then((data) => data.json())
-		.then((res) => console.log(res));
+	// Slider
+
+	let slideIndex = 1;
+	const slides = document.querySelectorAll(".offer__slide"),
+		prev = document.querySelector(".offer__slider-prev"),
+		next = document.querySelector(".offer__slider-next"),
+		total = document.querySelector("#total"),
+		current = document.querySelector("#current");
+
+	showSlides(slideIndex);
+
+	if (slides.length < 10) {
+		total.textContent = `0${slides.length}`;
+	} else {
+		total.textContent = slides.length;
+	}
+
+	function showSlides(n) {
+		if (n > slides.length) {
+			slideIndex = 1;
+		}
+		if (n < 1) {
+			slideIndex = slides.length;
+		}
+
+		slides.forEach((item) => (item.classList.add('hide')));
+
+		slides[slideIndex - 1].classList.remove('hide');
+
+		slides[slideIndex - 1].classList.add('show'); 
+
+		if (slides.length < 10) {
+			current.textContent = `0${slideIndex}`;
+		} else {
+			current.textContent = slideIndex;
+		}
+	}
+
+	function plusSlides(n) {
+		showSlides((slideIndex += n));
+	}
+
+	prev.addEventListener("click", function () {
+		plusSlides(-1);
+	});
+
+	next.addEventListener("click", function () {
+		plusSlides(1);
+	});
 });
